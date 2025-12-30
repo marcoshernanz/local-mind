@@ -142,13 +142,50 @@ impl VectorDatabase {
 
         let query_embedding = self.compute_embedding(&query)?;
 
+        // Hybrid Search: Prepare query tokens for keyword matching
+        // We split by whitespace and remove non-alphanumeric characters
+        let query_tokens: Vec<String> = query
+            .to_lowercase()
+            .split_whitespace()
+            .map(|s| {
+                s.chars()
+                    .filter(|c| c.is_alphanumeric())
+                    .collect::<String>()
+            })
+            .filter(|s| !s.is_empty())
+            .collect();
+
         let mut scores: Vec<(usize, f32)> = self
             .chunks
             .iter()
             .enumerate()
             .map(|(i, chunk)| {
-                let score = dot_product(&query_embedding, &chunk.embedding);
-                (i, score)
+                // 1. Vector Score (Semantic Meaning)
+                // Dot product of normalized vectors = Cosine Similarity
+                let vector_score = dot_product(&query_embedding, &chunk.embedding);
+
+                // 2. Keyword Score (Exact Match)
+                // Simple "Bag of Words" overlap
+                let chunk_lower = chunk.content.to_lowercase();
+                let mut matches = 0;
+                for token in &query_tokens {
+                    if chunk_lower.contains(token) {
+                        matches += 1;
+                    }
+                }
+
+                let keyword_score = if query_tokens.is_empty() {
+                    0.0
+                } else {
+                    matches as f32 / query_tokens.len() as f32
+                };
+
+                // 3. Hybrid Score (Weighted Combination)
+                // We give 70% weight to meaning (Vector) and 30% to exact matches (Keyword).
+                // This ensures that if a user types a specific name or ID, it gets boosted.
+                let hybrid_score = (vector_score * 0.7) + (keyword_score * 0.3);
+
+                (i, hybrid_score)
             })
             .collect();
 

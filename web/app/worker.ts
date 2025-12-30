@@ -178,8 +178,9 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
       const { query } = msg.payload;
       try {
         // Perform the search
-        // This is the heavy lifting that would freeze the UI if done on the main thread
-        const results = db.search(query, 5, 0.5);
+        // We lower the threshold to 0.3 because hybrid scoring (0.7 * vector + 0.3 * keyword)
+        // might produce lower absolute numbers if keyword match is 0, even if vector match is good.
+        const results = db.search(query, 5, 0.3);
         self.postMessage({ type: "SEARCH_RESULTS", payload: results });
       } catch (err) {
         self.postMessage({ type: "ERROR", payload: String(err) });

@@ -20,6 +20,10 @@ export default function Home() {
   const [searching, setSearching] = useState(false);
   const [docCount, setDocCount] = useState(0);
 
+  // Queue state for multiple file uploads
+  const [queueSize, setQueueSize] = useState(0);
+  const [processedCount, setProcessedCount] = useState(0);
+
   // Progress states
   const [initProgress, setInitProgress] = useState<{
     percent: number;
@@ -59,7 +63,8 @@ export default function Home() {
         case "DOCUMENT_ADDED":
           setDocCount(payload);
           setIndexProgress(null);
-          // alert(`Saved! Total chunks: ${payload}`); // Removed alert for smoother UX
+          // Increment processed count for the queue UI
+          setProcessedCount((prev) => prev + 1);
           break;
         case "ERROR":
           console.error("Worker error:", payload);
@@ -91,12 +96,27 @@ export default function Home() {
 
   const handleUpload = (file: File, content: string) => {
     if (!workerRef.current) return;
+
+    // Increment queue size when a file is added
+    setQueueSize((prev) => prev + 1);
+
     // Send the document content to the worker for processing
     workerRef.current.postMessage({
       type: "ADD_DOCUMENT",
       payload: { id: file.name, content },
     });
   };
+
+  // Reset queue when done
+  useEffect(() => {
+    if (queueSize > 0 && processedCount === queueSize) {
+      const timer = setTimeout(() => {
+        setQueueSize(0);
+        setProcessedCount(0);
+      }, 2000); // Hide after 2 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [processedCount, queueSize]);
 
   return (
     <main className="flex min-h-screen flex-col items-center p-24 bg-gray-900 text-white">
@@ -126,8 +146,33 @@ export default function Home() {
 
       <FileUploader onUpload={handleUpload} ready={ready} />
 
-      {/* Indexing Progress Toast */}
-      {indexProgress && (
+      {/* Queue Progress Indicator (Replaces the single file toast for bulk uploads) */}
+      {queueSize > 0 && (
+        <div className="fixed bottom-8 right-8 bg-gray-800 p-4 rounded-lg shadow-xl border border-gray-700 w-80 animate-fade-in">
+          <div className="flex justify-between items-center mb-2">
+            <span className="font-semibold text-sm">Processing Queue</span>
+            <span className="text-xs text-gray-400">
+              {processedCount} / {queueSize}
+            </span>
+          </div>
+          <div className="w-full bg-gray-700 rounded-full h-1.5 overflow-hidden">
+            <div
+              className="bg-blue-500 h-1.5 rounded-full transition-all duration-300"
+              style={{ width: `${(processedCount / queueSize) * 100}%` }}
+            ></div>
+          </div>
+          {/* Show current file details if available */}
+          {indexProgress && (
+            <p className="text-xs text-gray-500 mt-2 truncate">
+              Current: {indexProgress.filename} (
+              {Math.round(indexProgress.percent)}%)
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Indexing Progress Toast - Only show if queue is empty (single file upload) */}
+      {indexProgress && queueSize === 0 && (
         <div className="fixed bottom-8 right-8 bg-gray-800 p-4 rounded-lg shadow-xl border border-gray-700 w-80 animate-fade-in">
           <div className="flex justify-between items-center mb-2">
             <span className="font-semibold text-sm">Indexing Document</span>
