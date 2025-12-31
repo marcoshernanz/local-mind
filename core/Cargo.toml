@@ -25,3 +25,4 @@ anyhow = "1.0"
 text-splitter = { version = "0.28.0", default-features = false, features = [
   "markdown",
 ] }
+regex = "1.12.2"

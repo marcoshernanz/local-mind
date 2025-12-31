@@ -6,6 +6,8 @@ import { useEffect, useRef, useState } from "react";
 interface SearchResult {
   doc_id: string;
   content: string;
+  sender?: string;
+  date?: string;
   score: number;
 }
 
@@ -219,6 +221,12 @@ export default function Home() {
             >
               <p className="text-sm text-gray-400 mb-1">
                 Source: {r.doc_id} (Score: {r.score.toFixed(4)})
+                {r.sender && (
+                  <span className="ml-2 text-blue-400">From: {r.sender}</span>
+                )}
+                {r.date && (
+                  <span className="ml-2 text-green-400">Date: {r.date}</span>
+                )}
               </p>
               <p>{r.content}</p>
             </div>

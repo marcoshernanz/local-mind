@@ -2,8 +2,9 @@ use candle_core::{DType, Device, Tensor};
 use candle_nn::VarBuilder;
 use candle_transformers::models::bert::{BertModel, Config};
 use js_sys::Function;
+use regex::Regex;
 use serde::{Deserialize, Serialize};
-use text_splitter::{ChunkConfig, ChunkSizer, MarkdownSplitter, TextSplitter};
+use text_splitter::{ChunkConfig, ChunkSizer, TextSplitter};
 use tokenizers::Tokenizer;
 use wasm_bindgen::prelude::*;
 
@@ -23,6 +24,8 @@ impl<'a> ChunkSizer for BertSizer<'a> {
 struct TextChunk {
     doc_id: String,
     content: String,
+    sender: Option<String>,
+    date: Option<String>,
     embedding: Vec<f32>,
 }
 
@@ -30,6 +33,8 @@ struct TextChunk {
 pub struct SearchResult {
     pub doc_id: String,
     pub content: String,
+    pub sender: Option<String>,
+    pub date: Option<String>,
     pub score: f32,
 }
 
@@ -85,23 +90,35 @@ impl VectorDatabase {
 
         let tokenizer = self.tokenizer.as_ref().unwrap();
 
-        // Use TextSplitter with the Hugging Face Tokenizer
-        // This ensures chunks fit within the model's token limit (e.g., 512 tokens)
-        // and splits semantically.
-        let max_tokens = 100; // Target ~100 tokens per chunk for dense retrieval
-        let sizer = BertSizer { tokenizer };
-
-        let chunks: Vec<String> = if id.ends_with(".md") {
-            let splitter = MarkdownSplitter::new(ChunkConfig::new(max_tokens).with_sizer(sizer));
-            splitter.chunks(&content).map(|s| s.to_string()).collect()
+        // Check if it's a WhatsApp chat
+        // Heuristic: Check first 500 chars for date pattern
+        let is_whatsapp = if content.len() > 500 {
+            let preview = &content[..500];
+            // Regex for iOS: [DD/MM/YY, HH:MM:SS]
+            // Regex for Android: DD/MM/YY, HH:MM -
+            let ios_re = Regex::new(r"\[\d{1,2}/\d{1,2}/\d{2,4}, \d{1,2}:\d{2}:\d{2}\]").unwrap();
+            let android_re = Regex::new(r"\d{1,2}/\d{1,2}/\d{2,4}, \d{1,2}:\d{2} -").unwrap();
+            ios_re.is_match(preview) || android_re.is_match(preview)
         } else {
-            let splitter = TextSplitter::new(ChunkConfig::new(max_tokens).with_sizer(sizer));
-            splitter.chunks(&content).map(|s| s.to_string()).collect()
+            false
         };
 
-        let total_chunks = chunks.len();
+        let chunks_data: Vec<(String, Option<String>, Option<String>)> = if is_whatsapp {
+            self.parse_whatsapp(&content)
+        } else {
+            // Use TextSplitter with the Hugging Face Tokenizer
+            let max_tokens = 100; // Target ~100 tokens per chunk for dense retrieval
+            let sizer = BertSizer { tokenizer };
 
-        for (i, chunk_text) in chunks.into_iter().enumerate() {
+            let splitter = TextSplitter::new(ChunkConfig::new(max_tokens).with_sizer(sizer));
+            let chunks: Vec<String> = splitter.chunks(&content).map(|s| s.to_string()).collect();
+
+            chunks.into_iter().map(|c| (c, None, None)).collect()
+        };
+
+        let total_chunks = chunks_data.len();
+
+        for (i, (chunk_text, sender, date)) in chunks_data.into_iter().enumerate() {
             // Report progress back to JS
             if let Some(callback) = &on_progress {
                 let _ = callback.call2(
@@ -127,12 +144,69 @@ impl VectorDatabase {
             let chunk = TextChunk {
                 doc_id: id.clone(),
                 content: chunk_text,
+                sender,
+                date,
                 embedding,
             };
             self.chunks.push(chunk);
         }
 
         Ok(())
+    }
+
+    fn parse_whatsapp(&self, text: &str) -> Vec<(String, Option<String>, Option<String>)> {
+        let mut processed = Vec::new();
+
+        // Regex for iOS: [DD/MM/YY, HH:MM:SS] Sender: Message
+        let ios_re =
+            Regex::new(r"^\[(\d{1,2}/\d{1,2}/\d{2,4}, \d{1,2}:\d{2}:\d{2})\] (.*?): (.*)").unwrap();
+
+        // Regex for Android: DD/MM/YY, HH:MM - Sender: Message
+        let android_re =
+            Regex::new(r"^(\d{1,2}/\d{1,2}/\d{2,4}, \d{1,2}:\d{2}) - (.*?): (.*)").unwrap();
+
+        let mut current_msg: Option<(String, String, String)> = None; // (Date, Sender, Content)
+
+        for line in text.lines() {
+            if let Some(caps) = ios_re.captures(line) {
+                if let Some((date, sender, content)) = current_msg.take() {
+                    processed.push((content, Some(sender), Some(date)));
+                }
+                current_msg = Some((
+                    caps[1].to_string(),
+                    caps[2].to_string(),
+                    caps[3].to_string(),
+                ));
+            } else if let Some(caps) = android_re.captures(line) {
+                if let Some((date, sender, content)) = current_msg.take() {
+                    processed.push((content, Some(sender), Some(date)));
+                }
+                current_msg = Some((
+                    caps[1].to_string(),
+                    caps[2].to_string(),
+                    caps[3].to_string(),
+                ));
+            } else {
+                // Continuation or system message
+                // Check if it looks like a system message start (date but no sender match)
+                let is_date_start = Regex::new(r"^\[?\d{1,2}/\d{1,2}/\d{2,4}")
+                    .unwrap()
+                    .is_match(line);
+
+                if !is_date_start {
+                    if let Some((_, _, ref mut content)) = current_msg {
+                        content.push('\n');
+                        content.push_str(line);
+                    }
+                }
+            }
+        }
+
+        if let Some((date, sender, content)) = current_msg {
+            processed.push((content, Some(sender), Some(date)));
+        }
+
+        processed
     }
 
     pub fn search(&self, query: String, top_k: usize, threshold: f32) -> Result<JsValue, JsError> {
@@ -198,6 +272,8 @@ impl VectorDatabase {
             .map(|(i, score)| SearchResult {
                 doc_id: self.chunks[i].doc_id.clone(),
                 content: self.chunks[i].content.clone(),
+                sender: self.chunks[i].sender.clone(),
+                date: self.chunks[i].date.clone(),
                 score,
             })
             .collect();
