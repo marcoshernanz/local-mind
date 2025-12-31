@@ -70,6 +70,7 @@ export default function Home() {
           break;
         case "ERROR":
           console.error("Worker error:", payload);
+          console.log(payload);
           setSearching(false);
           setIndexProgress(null);
           alert("An error occurred in the worker. Check console.");
