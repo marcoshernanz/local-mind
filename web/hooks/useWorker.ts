@@ -9,6 +9,7 @@ export function useWorker() {
   const [isSearching, setIsSearching] = useState(false);
   const [uploads, setUploads] = useState<Record<string, UploadStatus>>({});
   const [docCount, setDocCount] = useState(0);
+  const [documents, setDocuments] = useState<string[]>([]);
 
   useEffect(() => {
     workerRef.current = new Worker(
@@ -28,6 +29,7 @@ export function useWorker() {
           break;
         case "RESTORED_DOCS":
           const restoredIds = payload as string[];
+          setDocuments(restoredIds);
           setUploads((prev) => {
             const next = { ...prev };
             restoredIds.forEach((id) => {
@@ -92,6 +94,10 @@ export function useWorker() {
           break;
         case "DOCUMENT_ADDED":
           setDocCount(payload.count);
+          setDocuments((prev) => {
+            if (prev.includes(payload.id)) return prev;
+            return [...prev, payload.id];
+          });
           setUploads((prev) => ({
             ...prev,
             [payload.id]: {
@@ -132,12 +138,12 @@ export function useWorker() {
     };
   }, []);
 
-  const search = useCallback((query: string) => {
+  const search = useCallback((query: string, allowedIds?: string[]) => {
     if (!workerRef.current || !query) return;
     setIsSearching(true);
     workerRef.current.postMessage({
       type: "SEARCH",
-      payload: { query },
+      payload: { query, allowedIds },
     });
   }, []);
 
@@ -177,6 +183,7 @@ export function useWorker() {
     isSearching,
     uploads,
     docCount,
+    documents,
     search,
     addDocument,
     cancelUpload,

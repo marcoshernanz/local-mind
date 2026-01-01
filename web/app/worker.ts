@@ -5,7 +5,7 @@ import { get, set } from "idb-keyval";
 type WorkerMessage =
   | { type: "INIT" }
   | { type: "ADD_DOCUMENT"; payload: { id: string; content: string } }
-  | { type: "SEARCH"; payload: { query: string } }
+  | { type: "SEARCH"; payload: { query: string; allowedIds?: string[] } }
   | { type: "CANCEL_DOCUMENT"; payload: { id: string } };
 
 // Global state for the worker
@@ -215,12 +215,12 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
 
     case "SEARCH":
       if (!db) return;
-      const { query } = msg.payload;
+      const { query, allowedIds } = msg.payload;
       try {
         // Perform the search
         // We lower the threshold to 0.3 because hybrid scoring (0.7 * vector + 0.3 * keyword)
         // might produce lower absolute numbers if keyword match is 0, even if vector match is good.
-        const results = db.search(query, 5, 0.3);
+        const results = db.search(query, 5, 0.3, allowedIds);
         self.postMessage({ type: "SEARCH_RESULTS", payload: results });
       } catch (err) {
         self.postMessage({ type: "ERROR", payload: String(err) });

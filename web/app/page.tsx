@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import FileUploader from "../components/FileUploader";
 import ModelLoading from "../components/ModelLoading";
 import SearchResults from "../components/SearchResults";
 import UploadProgress from "../components/UploadProgress";
+import ChatFilter from "../components/ChatFilter";
 import { useWorker } from "../hooks/useWorker";
 
 export default function Home() {
@@ -16,12 +17,47 @@ export default function Home() {
     uploads,
     search,
     addDocument,
+    documents,
   } = useWorker();
 
   const [query, setQuery] = useState("");
+  const [selectedDocs, setSelectedDocs] = useState<Set<string>>(new Set());
+  const knownDocsRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    const newDocs = documents.filter((d) => !knownDocsRef.current.has(d));
+    if (newDocs.length > 0) {
+      setSelectedDocs((prev) => {
+        const next = new Set(prev);
+        newDocs.forEach((d) => next.add(d));
+        return next;
+      });
+      newDocs.forEach((d) => knownDocsRef.current.add(d));
+    }
+  }, [documents]);
 
   const handleSearch = () => {
-    search(query);
+    search(query, Array.from(selectedDocs));
+  };
+
+  const toggleDoc = (id: string) => {
+    setSelectedDocs((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const toggleAll = (select: boolean) => {
+    if (select) {
+      setSelectedDocs(new Set(documents));
+    } else {
+      setSelectedDocs(new Set());
+    }
   };
 
   return (
@@ -37,7 +73,14 @@ export default function Home() {
       <UploadProgress uploads={uploads} />
 
       <div className="w-full max-w-2xl mt-8">
-      <div className="flex gap-2">
+        <ChatFilter
+          documents={documents}
+          selected={selectedDocs}
+          onToggle={toggleDoc}
+          onToggleAll={toggleAll}
+        />
+
+        <div className="flex gap-2 mb-4">
           <input
             type="text"
             value={query}

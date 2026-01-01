@@ -105,7 +105,13 @@ impl VectorDatabase {
         Ok(())
     }
 
-    pub fn search(&self, query: String, top_k: usize, threshold: f32) -> Result<JsValue, JsError> {
+    pub fn search(
+        &self,
+        query: String,
+        top_k: usize,
+        threshold: f32,
+        allowed_ids: Option<Vec<String>>,
+    ) -> Result<JsValue, JsError> {
         if self.embedder.is_none() {
             return Err(JsError::new("Model not loaded"));
         }
@@ -129,6 +135,13 @@ impl VectorDatabase {
             .chunks
             .iter()
             .enumerate()
+            .filter(|(_, chunk)| {
+                if let Some(allowed) = &allowed_ids {
+                    allowed.contains(&chunk.doc_id)
+                } else {
+                    true
+                }
+            })
             .map(|(i, chunk)| {
                 // 1. Vector Score (Semantic Meaning)
                 // Dot product of normalized vectors = Cosine Similarity
