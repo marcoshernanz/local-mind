@@ -86,34 +86,46 @@ export default function FileUploader({ onUpload, ready }: FileUploaderProps) {
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       className={`
-        p-8 border-2 border-dashed rounded-xl w-full max-w-2xl text-center transition-all duration-200
+        group relative overflow-hidden rounded-xl border border-dashed transition-all duration-300
         ${
           !ready
-            ? "border-gray-700 bg-gray-800 opacity-50 cursor-not-allowed"
+            ? "border-zinc-800 bg-zinc-900/30 opacity-50 cursor-not-allowed"
             : isDragging
-            ? "border-blue-500 bg-blue-500/10 scale-105"
-            : "border-gray-600 hover:border-gray-500 hover:bg-gray-800"
+            ? "border-indigo-500/50 bg-indigo-500/10 scale-[1.02]"
+            : "border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900/50 bg-zinc-900/20"
         }
       `}
     >
-      <div className="flex flex-col items-center gap-4">
-        <div className="text-4xl">📂</div>
-        <div>
-          <p className="text-lg font-medium mb-1">
-            {processing
-              ? "Processing files..."
-              : "Drag & Drop WhatsApp exports (.txt)"}
-          </p>
-          <p className="text-sm text-gray-400">Supports .txt files</p>
+      <div className="flex flex-col items-center justify-center gap-3 py-12 px-4 text-center">
+        <div
+          className={`
+          p-3 rounded-full bg-zinc-900 border border-zinc-800 transition-transform duration-300
+          ${
+            isDragging
+              ? "scale-110 border-indigo-500/30"
+              : "group-hover:scale-105"
+          }
+        `}
+        >
+          <span className="text-2xl">📂</span>
         </div>
 
-        <label className="relative cursor-pointer">
-          <span className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-            Browse Files
+        <div className="space-y-1">
+          <p className="text-sm font-medium text-zinc-300">
+            {processing
+              ? "Processing files..."
+              : "Drop your WhatsApp exports here"}
+          </p>
+          <p className="text-xs text-zinc-500">Supports .txt files</p>
+        </div>
+
+        <label className="relative mt-2 cursor-pointer">
+          <span className="text-xs font-medium text-indigo-400 hover:text-indigo-300 transition-colors">
+            or browse files
           </span>
           <input
             type="file"
-            multiple // Allow multiple selection
+            multiple
             accept=".txt,.md"
             onChange={handleInputChange}
             disabled={!ready || processing}

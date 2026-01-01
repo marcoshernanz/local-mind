@@ -211,15 +211,15 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
           return;
         }
 
+        const count = db.get_count();
+        self.postMessage({ type: "DOCUMENT_ADDED", payload: { count, id } });
+
         try {
           const dump = db.export_database();
           await set("local_mind_db_dump", dump);
         } catch (e) {
           console.error("Failed to save DB", e);
         }
-
-        const count = db.get_count();
-        self.postMessage({ type: "DOCUMENT_ADDED", payload: { count, id } });
       } catch (err) {
         self.postMessage({ type: "ERROR", payload: String(err) });
       }

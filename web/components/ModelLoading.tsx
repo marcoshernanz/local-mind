@@ -12,18 +12,18 @@ export default function ModelLoading({
   if (ready) return null;
 
   return (
-    <div className="w-full max-w-2xl mb-8">
-      <div className="flex justify-between text-sm text-gray-400 mb-1">
+    <div className="w-full max-w-xl mx-auto mb-8 animate-fade-in">
+      <div className="flex justify-between text-xs font-medium text-zinc-500 mb-2 uppercase tracking-wider">
         <span>{initProgress?.status || "Initializing..."}</span>
         <span>{Math.round(initProgress?.percent || 0)}%</span>
       </div>
-      <div className="w-full bg-gray-700 rounded-full h-2.5 overflow-hidden">
+      <div className="w-full bg-zinc-900 rounded-full h-1 overflow-hidden">
         <div
-          className="bg-blue-500 h-2.5 rounded-full transition-all duration-300 ease-out"
+          className="bg-indigo-500 h-1 rounded-full transition-all duration-300 ease-out shadow-[0_0_10px_rgba(99,102,241,0.5)]"
           style={{ width: `${initProgress?.percent || 0}%` }}
         ></div>
       </div>
-      <p className="text-xs text-gray-500 mt-2 text-center">
+      <p className="text-[10px] text-zinc-600 mt-2 text-center">
         First load may take a while (90MB). Subsequent loads will be instant.
       </p>
     </div>
