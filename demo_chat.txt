@@ -1,0 +1,48 @@
+[12/10/25, 09:15:22] Alex (CEO): Guys, did we deploy the new landing page?
+[12/10/25, 09:16:10] Sarah (Dev): Not yet, waiting on the Vercel build. It's failing on the edge function limits.
+[12/10/25, 09:16:45] Mike (CTO): We need to move that logic to a Worker. The bundle size is too big for the main thread.
+[12/10/25, 09:17:00] Alex (CEO): Okay, let's prioritize performance. First impressions matter.
+[12/10/25, 13:20:11] Sarah (Dev): Anyone hungry?
+[12/10/25, 13:21:05] Mike (CTO): I could go for some food.
+[12/10/25, 13:22:15] Alex (CEO): Let's hit that spicy ramen spot on Mission St. The one with the long line.
+[12/10/25, 13:22:30] Sarah (Dev): Tsujita?
+[12/10/25, 13:22:35] Alex (CEO): Yeah that one. Meet you there in 10.
+[14/10/25, 10:05:22] Alex (CEO): Big news. Y Combinator just replied.
+[14/10/25, 10:05:35] Sarah (Dev): NO WAY.
+[14/10/25, 10:05:40] Mike (CTO): What did they say?
+[14/10/25, 10:06:15] Alex (CEO): They want an interview next Tuesday. We need to polish the demo.
+[14/10/25, 10:07:00] Mike (CTO): I'll pull an all-nighter. We need to fix the latency on the vector search.
+[14/10/25, 10:07:22] Sarah (Dev): I'll handle the frontend animations. Framer Motion is acting up on mobile.
+[15/10/25, 15:45:11] Mike (CTO): Found a massive bug.
+[15/10/25, 15:45:22] Sarah (Dev): What now?
+[15/10/25, 15:46:05] Mike (CTO): The Rust memory management isn't freeing the tensors after inference. We have a memory leak.
+[15/10/25, 15:46:30] Alex (CEO): Can we fix it before the investor meeting?
+[15/10/25, 15:47:00] Mike (CTO): Yeah, I just need to wrap it in a Box and drop it manually.
+[20/10/25, 09:00:00] Alex (CEO): Today is the day.
+[20/10/25, 09:01:15] Sarah (Dev): Good luck guys!
+[20/10/25, 18:30:45] Alex (CEO): It went well. Garry Tan liked the privacy aspect.
+[20/10/25, 18:31:00] Mike (CTO): Did he ask about the tech stack?
+[20/10/25, 18:31:30] Alex (CEO): Yes, he loved that we are using WebAssembly for the heavy lifting. Said it's the future.
+[22/10/25, 11:15:22] Sarah (Dev): Hey, does anyone remember the name of that design tool Marcos recommended? The open source one?
+[22/10/25, 11:16:10] Mike (CTO): Penpot?
+[22/10/25, 11:16:15] Sarah (Dev): Yes! Penpot. Thanks.
+[25/10/25, 14:22:11] Alex (CEO): We need to think about the offsite.
+[25/10/25, 14:22:45] Sarah (Dev): Lake Tahoe?
+[25/10/25, 14:23:00] Mike (CTO): I prefer Yosemite. Hiking Half Dome would be epic.
+[25/10/25, 14:23:30] Alex (CEO): Let's do Yosemite in November then.
+[01/11/25, 09:00:11] System: Messages and calls are end-to-end encrypted.
+[01/11/25, 09:05:22] Marcos (Intern): Hey guys, just joined the chat. Where can I find the API keys?
+[01/11/25, 09:06:00] Mike (CTO): Welcome Marcos! Check the .env.example file in the repo. Never commit them to git!
+[01/11/25, 09:06:45] Marcos (Intern): Got it. Cloning the repo now.
+[02/11/25, 16:45:22] Sarah (Dev): Production is down.
+[02/11/25, 16:45:30] Alex (CEO): Panic.
+[02/11/25, 16:46:00] Mike (CTO): Looking into it. Looks like the database connection pool is exhausted.
+[02/11/25, 16:48:22] Mike (CTO): Fixed. Just increased the max connections in Supabase.
+[05/11/25, 10:00:00] Alex (CEO): Sequoia Capital just emailed us.
+[05/11/25, 10:00:15] Sarah (Dev): Stop it.
+[05/11/25, 10:00:30] Alex (CEO): Serious. They want to lead the Series A round.
+[05/11/25, 10:01:00] Mike (CTO): We are going to be rich.
+[05/11/25, 10:02:00] Alex (CEO): Let's focus. We need to ship the dark mode first.
+[10/11/25, 20:15:22] Sarah (Dev): I'm exhausted.
+[10/11/25, 20:15:45] Mike (CTO): Go home Sarah. You've been coding for 12 hours.
+[10/11/25, 20:16:00] Alex (CEO): Yeah, rest up. Tomorrow we celebrate.
