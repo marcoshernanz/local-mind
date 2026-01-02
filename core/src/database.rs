@@ -85,8 +85,17 @@ impl VectorDatabase {
                 );
             }
 
-            let text_to_embed = if i > 0 {
-                format!("{} {}", valid_chunks[i - 1].0, chunk_text)
+            let text_to_embed = if i > 0 && i < total_valid - 1 {
+                format!(
+                    "{} {} {}",
+                    valid_chunks[i - 1].0,
+                    chunk_text,
+                    valid_chunks[total_valid - 2].0
+                )
+            } else if i > 0 {
+                format!("{} {}", valid_chunks[i - 1].0, chunk_text,)
+            } else if i < total_valid - 1 {
+                format!("{} {}", chunk_text, valid_chunks[total_valid - 2].0)
             } else {
                 chunk_text.clone()
             };
