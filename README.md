@@ -1,9 +1,3 @@
-Demo gif
-Demo image
-How to use instructions
-Record video
-Security vulnerability
-
 # ChatVault 🔒
 
 **Your WhatsApp history, indexed locally with AI.**
@@ -12,9 +6,10 @@ ChatVault is a **local-first** semantic search engine for WhatsApp exports. It u
 
 **No servers. No data egress. 100% Private.**
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Rust](https://img.shields.io/badge/Built%20with-Rust-orange)
-![WebAssembly](https://img.shields.io/badge/Component-WebAssembly-purple)
+[![Try it Live](https://img.shields.io/badge/🚀_Try_it_Live-Vercel-black?style=for-the-badge&logo=vercel)](https://chat-vault-mh.vercel.app/)
+![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)
+![Rust](https://img.shields.io/badge/Built%20with-Rust-orange?style=flat)
+![WebAssembly](https://img.shields.io/badge/Component-WebAssembly-purple?style=flat)
 
 [Demo video](https://github.com/user-attachments/assets/98133bce-f5f8-49ad-adda-04d310bbddc0)
 
@@ -22,6 +17,35 @@ ChatVault is a **local-first** semantic search engine for WhatsApp exports. It u
 WhatsApp's native search is strictly keyword-based. If you search for *"recommendations for sushi"*, it won't find the message where your friend said *"we should go to that japanese place on 5th"*.
 
 **ChatVault** solves this by generating **vector embeddings** for your chats locally. It understands *meaning*, not just keywords.
+
+## 💻 Try it out
+
+### Option 1: Live Demo (Recommended)
+The fastest way to test the engineering is via the Vercel deployment. The Wasm module loads directly in your browser.
+
+👉 **[Launch ChatVault](https://chat-vault-mh.vercel.app/)**
+
+### Option 2: Running Locally
+If you want to inspect the Rust systems layer or modify the code:
+
+1.  **Clone the repo**
+    ```bash
+    git clone https://github.com/marcoshernanz/chat-vault.git
+    cd chat-vault
+    ```
+
+2.  **Install dependencies**
+    ```bash
+    # Ensure you have Rust installed (rustup)
+    cargo install wasm-pack
+    cd web && npm install
+    ```
+
+3.  **Run Development Server**
+    This command compiles the Rust core to Wasm and starts the Next.js server concurrently.
+    ```bash
+    npm run dev:all
+    ```
 
 ## 🛠️ Tech Stack (The "How")
 
@@ -38,6 +62,7 @@ This project pushes the browser to its limits, combining high-performance system
 *   **Web Workers:** Offloads heavy AI inference and indexing to a background thread to keep the UI at **60fps**.
 *   **IndexedDB:** Caches the model weights and vector index for instant subsequent loads.
 *   **Tailwind CSS v4:** Fluid, responsive UI.
+
 
 ## ⚡ Performance & Engineering
 
@@ -65,31 +90,6 @@ Running a Neural Network in JS usually freezes the browser. ChatVault uses a **W
 
 ### 3. Smart Parsing
 Includes custom Regex parsers for both **iOS** and **Android** WhatsApp export formats, handling multi-line messages and system notifications automatically.
-
-## 📦 Installation
-
-To run this locally:
-
-1.  **Clone the repo**
-    ```bash
-    git clone https://github.com/marcoshernanz/chat-vault.git
-    cd chat-vault
-    ```
-
-2.  **Install dependencies**
-    ```bash
-    npm install
-    # Ensure you have Rust installed (rustup)
-    cargo install wasm-pack
-    ```
-
-3.  **Run Development Server**
-    This command compiles the Rust core to Wasm and starts the Next.js server concurrently.
-    ```bash
-    npm run dev:all
-    ```
-
-4.  Open `http://localhost:3000`
 
 ## 🔒 Privacy Note
 **This application is 100% offline-capable.**

@@ -12,6 +12,7 @@
     "dev:all": "concurrently \"npm run dev:rust\" \"npm run dev:next\""
   },
   "dependencies": {
+    "@vercel/analytics": "^1.6.1",
     "idb-keyval": "^6.2.2",
     "next": "16.1.1",
     "react": "19.2.3",
