@@ -16,7 +16,7 @@ ChatVault is a **local-first** semantic search engine for WhatsApp exports. It u
 ![Rust](https://img.shields.io/badge/Built%20with-Rust-orange)
 ![WebAssembly](https://img.shields.io/badge/Component-WebAssembly-purple)
 
-[Demo video](/demo/demo_video.mp4)
+[Demo video]([/demo/demo_video.mp4](https://github.com/user-attachments/assets/98133bce-f5f8-49ad-adda-04d310bbddc0))
 
 ## 🚀 The Problem
 WhatsApp's native search is strictly keyword-based. If you search for *"recommendations for sushi"*, it won't find the message where your friend said *"we should go to that japanese place on 5th"*.
