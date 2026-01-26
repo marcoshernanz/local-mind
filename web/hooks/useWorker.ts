@@ -13,7 +13,7 @@ export function useWorker() {
 
   useEffect(() => {
     workerRef.current = new Worker(
-      new URL("../app/worker.ts", import.meta.url)
+      new URL("../app/worker.ts", import.meta.url),
     );
 
     workerRef.current.onmessage = (e) => {
